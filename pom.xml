@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.github.taogen-lib</groupId>
         <artifactId>spring-boot-parent</artifactId>
-        <version>bb42d827c2</version>
+        <version>599eb54319</version>
     </parent>
 
     <groupId>com.taogen.commons.boot</groupId>
