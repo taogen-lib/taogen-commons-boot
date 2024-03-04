@@ -21,11 +21,11 @@
     <modules>
         <module>data-access-es</module>
         <module>commons-boot</module>
-        <module>orm-mybatis-plus</module>
+        <module>data-access-mybatis-plus</module>
     </modules>
 
     <properties>
-        <taogen-commons.version>928f7eaa62</taogen-commons.version>
+        <taogen-commons.version>0.1.0</taogen-commons.version>
     </properties>
 
     <dependencyManagement>
@@ -34,6 +34,11 @@
                 <groupId>com.github.taogen-lib.taogen-commons</groupId>
                 <artifactId>commons-lang</artifactId>
                 <version>${taogen-commons.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.taogen.commons.boot</groupId>
+                <artifactId>commons-boot</artifactId>
+                <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

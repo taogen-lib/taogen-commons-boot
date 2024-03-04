@@ -40,7 +40,6 @@
         <dependency>
             <groupId>com.github.taogen-lib.taogen-commons</groupId>
             <artifactId>commons-lang</artifactId>
-            <version>0.1.0</version>
         </dependency>
 
         <!-- web basic -->
