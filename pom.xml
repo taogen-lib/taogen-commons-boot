@@ -13,10 +13,16 @@
     <groupId>com.taogen.commons.boot</groupId>
     <artifactId>taogen-commons-boot</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
     <name>taogen-commons-boot</name>
     <!-- FIXME change it to the project's website -->
     <url>http://www.example.com</url>
+    <modules>
+        <module>data-access-es</module>
+        <module>commons-boot</module>
+        <module>orm-mybatis-plus</module>
+    </modules>
 
     <properties>
         <taogen-commons.version>928f7eaa62</taogen-commons.version>
