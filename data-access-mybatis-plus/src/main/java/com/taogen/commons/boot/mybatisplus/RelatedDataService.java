@@ -25,7 +25,7 @@ import static com.taogen.commons.datatypes.string.StringCaseUtils.snakeCaseToCam
 @Slf4j
 public class RelatedDataService {
 
-    public static void setRelatedDataForList(List list, Class cls) {
+    public static void setRelatedDataForList(List<?> list, Class<?> cls) {
         if (list == null || list.isEmpty() || cls == null) {
             return;
         }
@@ -60,16 +60,17 @@ public class RelatedDataService {
         }
     }
 
-    private static void setMiddleTableFieldForList(List list, Field field) {
+    private static void setMiddleTableFieldForList(List<?> list, Field field) {
         MiddleTable annotation = field.getAnnotation(MiddleTable.class);
-        Set ids = new HashSet();
+        Set<Object> ids = new HashSet<>();
         for (Object obj : list) {
             Object id = getObjectField(obj, snakeCaseToCamelCase(annotation.idColumn()));
             ids.add(id);
         }
-        IService middleService = (IService) SpringUtils.getBean(annotation.middleService());
-        List middleList = middleService.list(new QueryWrapper<>()
-                .in(annotation.middleFromIdColumn(), ids));
+        IService<?> middleService = (IService) SpringUtils.getBean(annotation.middleService());
+        QueryWrapper queryWrapper = new QueryWrapper<>();
+        queryWrapper.in(annotation.middleFromIdColumn(), ids);
+        List<?> middleList = middleService.list();
         if (middleList == null || middleList.isEmpty()) {
             return;
         }
@@ -86,9 +87,10 @@ public class RelatedDataService {
             }
             toIds.add(toId);
         }
-        IService targetService = (IService) SpringUtils.getBean(annotation.targetService());
-        List targetList = targetService.list(new QueryWrapper<>()
-                .in(annotation.targetIdColumn(), toIdSet));
+        IService<?> targetService = (IService) SpringUtils.getBean(annotation.targetService());
+        QueryWrapper targetQueryWrapper = new QueryWrapper<>();
+        targetQueryWrapper.in(annotation.targetIdColumn(), toIdSet);
+        List<?> targetList = targetService.list(targetQueryWrapper);
         if (targetList == null || targetList.isEmpty()) {
             return;
         }
@@ -103,16 +105,16 @@ public class RelatedDataService {
             if (toIds == null || toIds.isEmpty()) {
                 continue;
             }
-            List targetObjList = toIds.stream()
-                    .map(item -> targetMap.get(item))
+            List<?> targetObjList = toIds.stream()
+                    .map(targetMap::get)
                     .collect(Collectors.toList());
             setObjectField(obj, field.getName(), targetObjList);
         }
     }
 
-    private static void setRelatedFieldForList(List list, Field field) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    private static void setRelatedFieldForList(List<?> list, Field field) {
         Set<String> relatedFieldValueSet = getFieldValuesFromList(list, field);
-        List relatedEntityList = getRelatedEntityList(field.getAnnotation(Related.class), relatedFieldValueSet);
+        List<?> relatedEntityList = getRelatedEntityList(field.getAnnotation(Related.class), relatedFieldValueSet);
         setRelatedFieldDataToList(list, field, relatedEntityList);
     }
 
@@ -121,13 +123,13 @@ public class RelatedDataService {
      * @param relatedFieldValueSet
      * @return if RelatedType is LEVEL only return List<entityClass>, others RelatedType can return List<IdName> or List<entityClass>
      */
-    private static List getRelatedEntityList(Related relatedAnnotation, Set<String> relatedFieldValueSet) {
+    private static List<?> getRelatedEntityList(Related relatedAnnotation, Set<String> relatedFieldValueSet) {
         if (relatedFieldValueSet == null || relatedFieldValueSet.isEmpty()) {
             return Collections.emptyList();
         }
-        List relatedEntityList = null;
-        IService service = (IService) SpringUtils.getBean(relatedAnnotation.serviceClass());
-        QueryWrapper queryWrapper = new QueryWrapper();
+        List<?> relatedEntityList = null;
+        IService<?> service = (IService<?>) SpringUtils.getBean(relatedAnnotation.serviceClass());
+        QueryWrapper queryWrapper = new QueryWrapper<>();
         if (IdName.class.equals(relatedAnnotation.returnType()) &&
                 !Related.RelatedType.LEVEL.equals(relatedAnnotation.relatedType())) {
             queryWrapper.select(relatedAnnotation.idColumn(), relatedAnnotation.nameColumn());
@@ -139,22 +141,22 @@ public class RelatedDataService {
         }
         if (Related.RelatedType.LEVEL.equals(relatedAnnotation.relatedType())) {
             Set<String> totalIds = relatedFieldValueSet;
-            Set<String> parentIds = (Set<String>) relatedEntityList.stream()
-                    .map(item -> getObjectField(item, relatedAnnotation.parentIdFieldName()))
-                    .filter(item -> item != null)
+            Set<String> parentIds = relatedEntityList.stream()
+                    .map(item -> getObjectField(item, snakeCaseToCamelCase(relatedAnnotation.parentIdColumn())))
+                    .filter(Objects::nonNull)
                     .map(Object::toString)
                     .collect(Collectors.toCollection(LinkedHashSet::new));
             parentIds.removeAll(totalIds);
             totalIds.addAll(parentIds);
             while (parentIds != null && !parentIds.isEmpty()) {
-                queryWrapper = new QueryWrapper();
+                queryWrapper = new QueryWrapper<>();
                 queryWrapper.in(relatedAnnotation.idColumn(), parentIds);
                 List parentEntityList = service.list(queryWrapper);
                 if (parentEntityList != null) {
                     relatedEntityList.addAll(parentEntityList);
                     parentIds = (Set<String>) parentEntityList.stream()
-                            .map(item -> getObjectField(item, relatedAnnotation.parentIdFieldName()))
-                            .filter(item -> item != null)
+                            .map(item -> getObjectField(item, snakeCaseToCamelCase(relatedAnnotation.parentIdColumn())))
+                            .filter(Objects::nonNull)
                             .map(Object::toString)
                             .collect(Collectors.toCollection(LinkedHashSet::new));
                     parentIds.removeAll(totalIds);
@@ -174,7 +176,7 @@ public class RelatedDataService {
      * @throws NoSuchMethodException
      * @throws IllegalAccessException
      */
-    private static void setRelatedFieldDataToList(List list, Field field, List relatedEntityList) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    private static void setRelatedFieldDataToList(List<?> list, Field field, List<?> relatedEntityList) {
         if (list == null || list.isEmpty() || relatedEntityList == null || relatedEntityList.isEmpty()) {
             return;
         }
@@ -204,7 +206,7 @@ public class RelatedDataService {
                     if (relatedFieldValues == null || relatedFieldValues.isEmpty()) {
                         return;
                     }
-                    List fieldValue = relatedFieldValues.stream()
+                    List<?> fieldValue = relatedFieldValues.stream()
                             .map(item -> {
                                 Object itemValue = relatedEntityMap.get(String.valueOf(item));
                                 if (IdName.class.equals(relatedAnnotation.returnType())) {
@@ -220,11 +222,11 @@ public class RelatedDataService {
                             .collect(Collectors.toList());
                     setObjectField(entity, field.getName(), fieldValue);
                 } else if (Related.RelatedType.LEVEL.equals(relatedAnnotation.relatedType())) {
-                    List fieldValue = new ArrayList();
+                    List<Object> fieldValue = new ArrayList<>();
                     Object fieldItem = relatedEntityMap.get(String.valueOf(relatedFieldValue));
                     while (fieldItem != null) {
                         fieldValue.add(fieldItem);
-                        fieldItem = relatedEntityMap.get(String.valueOf(getObjectField(fieldItem, relatedAnnotation.parentIdFieldName())));
+                        fieldItem = relatedEntityMap.get(String.valueOf(getObjectField(fieldItem, snakeCaseToCamelCase(relatedAnnotation.parentIdColumn()))));
                     }
                     setObjectField(entity, field.getName(), fieldValue);
                 }
@@ -243,7 +245,7 @@ public class RelatedDataService {
      * @throws NoSuchMethodException
      * @throws IllegalAccessException
      */
-    private static Set<String> getFieldValuesFromList(List list, Field field) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    private static Set<String> getFieldValuesFromList(List<?> list, Field field) {
         if (list == null || list.isEmpty()) {
             return Collections.emptySet();
         }
@@ -262,7 +264,7 @@ public class RelatedDataService {
                 }
             }
         }
-        return ids != null ? ids : Collections.emptySet();
+        return ids != null && !ids.isEmpty() ? ids : Collections.emptySet();
     }
 
     public static Object getObjectField(Object obj, String fieldName) {
@@ -271,7 +273,7 @@ public class RelatedDataService {
         }
         Object returnObject = null;
         String methodName = "get" + firstLetterToUpperCase(fieldName);
-        Class classNode = obj.getClass();
+        Class<?> classNode = obj.getClass();
         boolean isDone = false;
         while (!Object.class.equals(classNode)) {
             List<Method> methodList = Arrays.asList(classNode.getDeclaredMethods());
@@ -279,9 +281,7 @@ public class RelatedDataService {
                 if (method.getName().equals(methodName)) {
                     try {
                         returnObject = method.invoke(obj);
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    } catch (InvocationTargetException e) {
+                    } catch (IllegalAccessException | InvocationTargetException e) {
                         e.printStackTrace();
                     }
                     isDone = true;
@@ -301,7 +301,7 @@ public class RelatedDataService {
             return;
         }
         String methodName = "set" + firstLetterToUpperCase(fieldName);
-        Class classNode = obj.getClass();
+        Class<?> classNode = obj.getClass();
         boolean isDone = false;
         while (!Object.class.equals(classNode)) {
             List<Method> methodList = Arrays.asList(classNode.getDeclaredMethods());
@@ -309,9 +309,7 @@ public class RelatedDataService {
                 if (method.getName().equals(methodName)) {
                     try {
                         method.invoke(obj, fieldValue);
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    } catch (InvocationTargetException e) {
+                    } catch (IllegalAccessException | InvocationTargetException e) {
                         e.printStackTrace();
                     }
                     isDone = true;
@@ -332,10 +330,10 @@ public class RelatedDataService {
         return source.substring(0, 1).toUpperCase() + source.substring(1);
     }
 
-    private static List<Field> getAllFieldsOfClassAndItsParent(Class cls) {
+    private static List<Field> getAllFieldsOfClassAndItsParent(Class<?> cls) {
         List<Field> fields = new ArrayList<>();
         fields.addAll(Arrays.asList(cls.getDeclaredFields()));
-        Class node = cls;
+        Class<?> node = cls;
         while (!Object.class.equals(node.getSuperclass())) {
             node = node.getSuperclass();
             fields.addAll(Arrays.asList(node.getDeclaredFields()));
@@ -343,10 +341,10 @@ public class RelatedDataService {
         return fields;
     }
 
-    private static List<Method> getAllMethodsOfClassAndItsParent(Class cls) {
+    private static List<Method> getAllMethodsOfClassAndItsParent(Class<?> cls) {
         List<Method> methods = new ArrayList<>();
         methods.addAll(Arrays.asList(cls.getDeclaredMethods()));
-        Class node = cls;
+        Class<?> node = cls;
         while (!Object.class.equals(node.getSuperclass())) {
             node = node.getSuperclass();
             methods.addAll(Arrays.asList(node.getDeclaredMethods()));

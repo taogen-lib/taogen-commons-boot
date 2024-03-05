@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface Related {
-    public RelatedType relatedType();
+    RelatedType relatedType();
 
     /**
      * It's MyBatis Plus service subclass
@@ -16,24 +16,22 @@ public @interface Related {
      *
      * @return
      */
-    public Class serviceClass();
+    Class<?> serviceClass();
 
     /**
      * support {entityClass} or IdName.class
      *
      * @return
      */
-    public Class returnType();
+    Class<?> returnType();
 
-    public String relatedFieldName();
+    String relatedFieldName();
 
-    public String idColumn() default "id";
+    String idColumn() default "id";
 
-    public String nameColumn() default "name";
+    String nameColumn() default "name";
 
-    public String parentIdColumn() default "parent_id";
-
-    public String parentIdFieldName() default "parentId";
+    String parentIdColumn() default "parent_id";
 
     enum RelatedType {
         /**
