@@ -192,10 +192,7 @@ public class RelatedDataService {
                     Object fieldValue = relatedEntityMap.get(String.valueOf(relatedFieldValue));
                     if (IdName.class.equals(relatedAnnotation.returnType())) {
                         IdName idName = new IdName();
-                        setObjectField(idName, "id",
-                                parseIntegerToLong(getObjectField(fieldValue, snakeCaseToCamelCase(relatedAnnotation.idColumn())), null));
-                        setObjectField(idName, "name",
-                                getObjectField(fieldValue, snakeCaseToCamelCase(relatedAnnotation.nameColumn())));
+                        setIdNameFields(idName, fieldValue, relatedAnnotation);
                         fieldValue = idName;
                     }
                     setObjectField(entity, field.getName(), fieldValue);
@@ -211,10 +208,7 @@ public class RelatedDataService {
                                 Object itemValue = relatedEntityMap.get(String.valueOf(item));
                                 if (IdName.class.equals(relatedAnnotation.returnType())) {
                                     IdName idName = new IdName();
-                                    setObjectField(idName, snakeCaseToCamelCase(relatedAnnotation.idColumn()),
-                                            parseIntegerToLong(getObjectField(itemValue, snakeCaseToCamelCase(relatedAnnotation.idColumn())), null));
-                                    setObjectField(idName, snakeCaseToCamelCase(relatedAnnotation.nameColumn()),
-                                            getObjectField(itemValue, relatedAnnotation.nameColumn()));
+                                    setIdNameFields(idName, itemValue, relatedAnnotation);
                                     itemValue = idName;
                                 }
                                 return itemValue;
@@ -232,6 +226,29 @@ public class RelatedDataService {
                 }
             }
         }
+    }
+
+    private static void setIdNameFields(IdName idName, Object fieldValue, Related relatedAnnotation) {
+        try {
+            Field id = IdName.class.getDeclaredField("id");
+            if (id.getType().equals(Long.class)) {
+                setObjectField(idName, "id",
+                        parseIntegerToLong(getObjectField(fieldValue, snakeCaseToCamelCase(relatedAnnotation.idColumn())), null));
+            }
+            if (id.getType().equals(Integer.class)) {
+                setObjectField(idName, "id",
+                        parseLongToInteger(getObjectField(fieldValue, snakeCaseToCamelCase(relatedAnnotation.idColumn())), null));
+            }
+            if (id.getType().equals(String.class)) {
+                setObjectField(idName, "id",
+                        Objects.toString(getObjectField(fieldValue, snakeCaseToCamelCase(relatedAnnotation.idColumn()))));
+            }
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        }
+        setObjectField(idName, "name",
+                getObjectField(fieldValue, snakeCaseToCamelCase(relatedAnnotation.nameColumn())));
+
     }
 
 
