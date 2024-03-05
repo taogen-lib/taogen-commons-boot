@@ -1,11 +1,16 @@
 package com.taogen.commons.boot.mybatisplus;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.LambdaUtils;
+import com.baomidou.mybatisplus.core.toolkit.support.LambdaMeta;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.taogen.commons.boot.SpringUtils;
 import com.taogen.commons.boot.mybatisplus.annotation.MiddleTable;
 import com.taogen.commons.boot.mybatisplus.annotation.Related;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.reflection.property.PropertyNamer;
+import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -14,6 +19,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.taogen.commons.datatypes.string.StringCaseUtils.snakeCaseToCamelCase;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * Related Data Service
@@ -24,6 +30,53 @@ import static com.taogen.commons.datatypes.string.StringCaseUtils.snakeCaseToCam
  */
 @Slf4j
 public class RelatedDataService {
+
+    public static <S, R, T> void saveOrUpdateMiddleTable(S id, Set<S> targetIds, Class<R> middleClass, SFunction<T, ?> annotationFieldName) throws NoSuchFieldException {
+        LambdaMeta meta = LambdaUtils.extract(annotationFieldName);
+        Class<?> instantiatedClass = meta.getInstantiatedClass();
+        String fieldName = PropertyNamer.methodToProperty(meta.getImplMethodName());
+        if (CollectionUtils.isEmpty(targetIds)) {
+            return;
+        }
+        Field declaredField = instantiatedClass.getDeclaredField(fieldName);
+        MiddleTable middleTable = declaredField.getAnnotation(MiddleTable.class);
+        IService<R> service = (IService<R>) SpringUtils.getBean(middleTable.middleService());
+        QueryWrapper<R> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(middleTable.middleFromIdColumn(), id);
+        List<R> middleList = service.list(queryWrapper);
+        Set<S> toAddSet = targetIds;
+        Set<S> toRemoveSet = null;
+        if (middleList != null && !middleList.isEmpty()) {
+            LinkedHashSet<S> oldSet = middleList.stream()
+                    .map(item -> getObjectField(item, snakeCaseToCamelCase(middleTable.middleToIdColumn())))
+                    .map(item -> (S) item)
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+            toRemoveSet = oldSet.stream().filter(item -> !targetIds.contains(item)).collect(toSet());
+            toAddSet = targetIds.stream().filter(item -> !oldSet.contains(item)).collect(toSet());
+        }
+        if (toAddSet != null && !toAddSet.isEmpty()) {
+            Collection<R> middleEntityList = toAddSet.stream()
+                    .map(item -> {
+                        try {
+                            R middleEntity = middleClass.newInstance();
+                            setObjectField(middleEntity, snakeCaseToCamelCase(middleTable.middleFromIdColumn()), id);
+                            setObjectField(middleEntity, snakeCaseToCamelCase(middleTable.middleToIdColumn()), item);
+                            return middleEntity;
+                        } catch (InstantiationException | IllegalAccessException e) {
+                            log.error(e.getMessage(), e);
+                            return null;
+                        }
+                    })
+                    .collect(Collectors.toList());
+            service.saveBatch(middleEntityList);
+        }
+        if (toRemoveSet != null && !toRemoveSet.isEmpty()) {
+            queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq(middleTable.middleFromIdColumn(), id);
+            queryWrapper.in(middleTable.middleToIdColumn(), toRemoveSet);
+            service.remove(queryWrapper);
+        }
+    }
 
     public static void setRelatedDataForList(List<?> list, Class<?> cls) {
         if (list == null || list.isEmpty() || cls == null) {

@@ -1,6 +1,8 @@
 package com.taogen.commons.boot.mybatisplus.samples.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.taogen.commons.boot.mybatisplus.IdName;
 import com.taogen.commons.boot.mybatisplus.annotation.MiddleTable;
@@ -16,6 +18,7 @@ import java.util.List;
 @Data
 @TableName("user")
 public class User {
+    @TableId(type = IdType.AUTO)
     private Integer id;
 
     private String name;
