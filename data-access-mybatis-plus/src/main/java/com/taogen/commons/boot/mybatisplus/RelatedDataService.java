@@ -3,6 +3,8 @@ package com.taogen.commons.boot.mybatisplus;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.taogen.commons.boot.SpringUtils;
+import com.taogen.commons.boot.mybatisplus.annotation.MiddleTable;
+import com.taogen.commons.boot.mybatisplus.annotation.Related;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;

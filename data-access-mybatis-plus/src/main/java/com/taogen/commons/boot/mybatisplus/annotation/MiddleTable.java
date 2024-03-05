@@ -1,4 +1,4 @@
-package com.taogen.commons.boot.mybatisplus;
+package com.taogen.commons.boot.mybatisplus.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
