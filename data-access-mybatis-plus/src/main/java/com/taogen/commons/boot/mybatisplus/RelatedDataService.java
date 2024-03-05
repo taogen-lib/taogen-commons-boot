@@ -46,6 +46,66 @@ public class RelatedDataService {
                 log.error(e.getMessage(), e);
             }
         }
+        List<Field> middleTableFieldList = fields.stream()
+                .filter(item -> item.isAnnotationPresent(MiddleTable.class))
+                .collect(Collectors.toList());
+        for (Field field : middleTableFieldList) {
+            try {
+                setMiddleTableFieldForList(list, field);
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    private static void setMiddleTableFieldForList(List list, Field field) {
+        MiddleTable annotation = field.getAnnotation(MiddleTable.class);
+        Set ids = new HashSet();
+        for (Object obj : list) {
+            Object id = getObjectField(obj, snakeCaseToCamelCase(annotation.idColumn()));
+            ids.add(id);
+        }
+        IService middleService = (IService) SpringUtils.getBean(annotation.middleService());
+        List middleList = middleService.list(new QueryWrapper<>()
+                .in(annotation.middleFromIdColumn(), ids));
+        if (middleList == null || middleList.isEmpty()) {
+            return;
+        }
+        Map<String, LinkedHashSet<String>> fromIdToToIds = new HashMap<>();
+        Set<String> toIdSet = new HashSet<>();
+        for (Object middle : middleList) {
+            String fromId = String.valueOf(getObjectField(middle, snakeCaseToCamelCase(annotation.middleFromIdColumn())));
+            String toId = String.valueOf(getObjectField(middle, snakeCaseToCamelCase(annotation.middleToIdColumn())));
+            toIdSet.add(toId);
+            LinkedHashSet<String> toIds = fromIdToToIds.get(fromId);
+            if (toIds == null) {
+                toIds = new LinkedHashSet<>();
+                fromIdToToIds.put(fromId, toIds);
+            }
+            toIds.add(toId);
+        }
+        IService targetService = (IService) SpringUtils.getBean(annotation.targetService());
+        List targetList = targetService.list(new QueryWrapper<>()
+                .in(annotation.targetIdColumn(), toIdSet));
+        if (targetList == null || targetList.isEmpty()) {
+            return;
+        }
+        Map<String, Object> targetMap = new HashMap<>();
+        for (Object target : targetList) {
+            String id = String.valueOf(getObjectField(target, snakeCaseToCamelCase(annotation.targetIdColumn())));
+            targetMap.put(id, target);
+        }
+        for (Object obj : list) {
+            String fromId = String.valueOf(getObjectField(obj, snakeCaseToCamelCase(annotation.idColumn())));
+            LinkedHashSet<String> toIds = fromIdToToIds.get(fromId);
+            if (toIds == null || toIds.isEmpty()) {
+                continue;
+            }
+            List targetObjList = toIds.stream()
+                    .map(item -> targetMap.get(item))
+                    .collect(Collectors.toList());
+            setObjectField(obj, field.getName(), targetObjList);
+        }
     }
 
     private static void setRelatedFieldForList(List list, Field field) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {

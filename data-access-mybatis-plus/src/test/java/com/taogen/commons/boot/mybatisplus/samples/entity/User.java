@@ -3,10 +3,9 @@ package com.taogen.commons.boot.mybatisplus.samples.entity;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.taogen.commons.boot.mybatisplus.IdName;
+import com.taogen.commons.boot.mybatisplus.MiddleTable;
 import com.taogen.commons.boot.mybatisplus.Related;
-import com.taogen.commons.boot.mybatisplus.samples.service.AreaService;
-import com.taogen.commons.boot.mybatisplus.samples.service.DepartmentService;
-import com.taogen.commons.boot.mybatisplus.samples.service.HobbyService;
+import com.taogen.commons.boot.mybatisplus.samples.service.*;
 import lombok.Data;
 
 import java.util.List;
@@ -40,4 +39,8 @@ public class User {
     @TableField(exist = false)
     @Related(relatedType = Related.RelatedType.LEVEL, serviceClass = AreaService.class, returnType = Area.class, relatedFieldName = "areaId")
     private List<Area> area;
+
+    @TableField(exist = false)
+    @MiddleTable(middleService = UserRoleService.class, targetService = RoleService.class, middleFromIdColumn = "user_id", middleToIdColumn = "role_id")
+    private List<Role> roles;
 }
