@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration>
+<configuration>
+    <!-- Define properties. You can use these properties in appender configurations.-->
+    <property name="console.log.pattern"
+              value="%red(%d{yyyy-MM-dd HH:mm:ss}) %green([%thread]) %highlight(%-5level) %boldMagenta(%logger{36}:%line%n) - %msg%n"/>
+    <property name="file.log.pattern" value="%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"/>
+    <property name="file.log.dir" value="./logs"/>
+    <property name="file.log.filename" value="mylogs"/>
+
+    <!-- Define the CONSOLE appender. 1) log pattern. 2) log file path. -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${console.log.pattern}</pattern>
+            <charset>utf8</charset>
+        </encoder>
+    </appender>
+
+    <!-- RollingFileAppender: Adds the capability to perform log file rotation. You can define a rolling policy, specifying criteria such as time-based or size-based rollover. -->
+    <appender name="ROLLING_FILE_INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${file.log.dir}/${file.log.filename}-info.log</file>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- Log file will roll over daily -->
+            <fileNamePattern>${file.log.dir}/${file.log.filename}-info-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <!-- Keep 30 days' worth of logs -->
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${file.log.pattern}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ROLLING_FILE_ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${file.log.dir}/${file.log.filename}-error.log</file>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- Log file will roll over daily -->
+            <fileNamePattern>${file.log.dir}/${file.log.filename}-error-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <!-- Keep 30 days' worth of logs -->
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${file.log.pattern}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ROLLING_FILE_CUSTOM" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${file.log.dir}/custom-logs.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- Log file will roll over daily -->
+            <fileNamePattern>${file.log.dir}/custom-logs-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <!-- Keep 30 days' worth of logs -->
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${file.log.pattern}</pattern>
+        </encoder>
+    </appender>
+
+    <springProfile name="test-mysql">
+        <!-- Define root logger. 1) Set the default level for all loggers. 2) Set which appenders to use. -->
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ROLLING_FILE_INFO"/>
+            <appender-ref ref="ROLLING_FILE_ERROR"/>
+        </root>
+        <!-- Define loggers. Set log level for specific packages. -->
+        <logger name="com.taogen.commons" level="DEBUG" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ROLLING_FILE_INFO"/>
+            <appender-ref ref="ROLLING_FILE_ERROR"/>
+        </logger>
+        <!-- custom logger -->
+        <logger name="my-custom-log" level="INFO" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ROLLING_FILE_CUSTOM"/>
+        </logger>
+    </springProfile>
+    <springProfile name="prod">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ROLLING_FILE_INFO"/>
+            <appender-ref ref="ROLLING_FILE_ERROR"/>
+        </root>
+        <logger name="my-custom-log" level="INFO" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ROLLING_FILE_CUSTOM"/>
+        </logger>
+    </springProfile>
+</configuration>
