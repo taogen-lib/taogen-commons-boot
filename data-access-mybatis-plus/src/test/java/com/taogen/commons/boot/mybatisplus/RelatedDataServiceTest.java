@@ -4,10 +4,7 @@ import com.taogen.commons.boot.mybatisplus.samples.entity.User;
 import com.taogen.commons.boot.mybatisplus.samples.entity.UserRole;
 import com.taogen.commons.boot.mybatisplus.samples.service.UserService;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Arrays;
@@ -18,9 +15,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest(classes = AppTest.class)
-@ExtendWith(SpringExtension.class)
-class RelatedDataServiceTest {
+class RelatedDataServiceTest extends BaseTest {
     @Autowired
     private UserService userService;
 
