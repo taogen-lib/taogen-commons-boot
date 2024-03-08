@@ -64,34 +64,23 @@
         </encoder>
     </appender>
 
-    <springProfile name="test-mysql">
-        <!-- Define root logger. 1) Set the default level for all loggers. 2) Set which appenders to use. -->
-        <root level="INFO">
-            <appender-ref ref="CONSOLE"/>
-            <appender-ref ref="ROLLING_FILE_INFO"/>
-            <appender-ref ref="ROLLING_FILE_ERROR"/>
-        </root>
+    <!-- Define root logger. 1) Set the default level for all loggers. 2) Set which appenders to use. -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="ROLLING_FILE_INFO"/>
+        <appender-ref ref="ROLLING_FILE_ERROR"/>
+    </root>
+    <!-- custom logger -->
+    <logger name="my-custom-log" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="ROLLING_FILE_CUSTOM"/>
+    </logger>
+    <springProfile name="test-mysql | test-mysql2">
         <!-- Define loggers. Set log level for specific packages. -->
         <logger name="com.taogen.commons" level="DEBUG" additivity="false">
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="ROLLING_FILE_INFO"/>
             <appender-ref ref="ROLLING_FILE_ERROR"/>
-        </logger>
-        <!-- custom logger -->
-        <logger name="my-custom-log" level="INFO" additivity="false">
-            <appender-ref ref="CONSOLE"/>
-            <appender-ref ref="ROLLING_FILE_CUSTOM"/>
-        </logger>
-    </springProfile>
-    <springProfile name="prod">
-        <root level="INFO">
-            <appender-ref ref="CONSOLE"/>
-            <appender-ref ref="ROLLING_FILE_INFO"/>
-            <appender-ref ref="ROLLING_FILE_ERROR"/>
-        </root>
-        <logger name="my-custom-log" level="INFO" additivity="false">
-            <appender-ref ref="CONSOLE"/>
-            <appender-ref ref="ROLLING_FILE_CUSTOM"/>
         </logger>
     </springProfile>
 </configuration>
