@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Properties>
+        <Property name="console.log.pattern">%style{%d}{red} %style{[%t]}{Green} %highlight{%-5level}{STYLE=Logback}
+            %style{%c{1.}.%M:%L}{Magenta}\n - %msg%n
+        </Property>
+        <Property name="file.log.pattern">%d [%t] %-5level %logger{36} - %msg%n</Property>
+        <Property name="file.log.dir">./log4j2</Property>
+        <Property name="file.log.filename">mylogs</Property>
+    </Properties>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${console.log.pattern}"/>
+        </Console>
+        <RollingFile name="RollingFileInfo"
+                     fileName="${file.log.dir}/${file.log.filename}-info.log"
+                     filePattern="${file.log.dir}/${file.log.filename}-info-%d{yyyy-MM-dd}-%i.log">
+            <LevelRangeFilter maxLevel="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="${file.log.pattern}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+        <RollingFile name="RollingFileError"
+                     fileName="${file.log.dir}/${file.log.filename}-error.log"
+                     filePattern="${file.log.dir}/${file.log.filename}-error-%d{yyyy-MM-dd}-%i.log">
+            <LevelRangeFilter minLevel="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="${file.log.pattern}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+        <RollingFile name="RollingFileCustom"
+                     fileName="${file.log.dir}/custom-logs.log"
+                     filePattern="${file.log.dir}/custom-logs-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="${file.log.pattern}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Logger name="com.taogen.commons" level="DEBUG" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="RollingFileInfo"/>
+            <AppenderRef ref="RollingFileError"/>
+        </Logger>
+        <Logger name="my-custom-log" level="INFO" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="RollingFileCustom"/>
+        </Logger>
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="RollingFileInfo"/>
+            <AppenderRef ref="RollingFileError"/>
+        </Root>
+    </Loggers>
+</Configuration>
+

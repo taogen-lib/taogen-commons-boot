@@ -4,3 +4,5 @@ spring:
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.taogen.commons.boot.mybatisplus.samples.entity
+#logging:
+#  config: classpath:log4j2-${spring.profiles.active}.xml
