@@ -3,6 +3,8 @@ package com.taogen.commons.boot.mybatisplus;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.taogen.commons.boot.SpringUtils;
+import com.taogen.commons.boot.mybatisplus.relatedquery.IdName;
+import com.taogen.commons.boot.mybatisplus.relatedquery.RelatedDataService;
 import com.taogen.commons.datatypes.string.StringUtils;
 import org.springframework.util.CollectionUtils;
 

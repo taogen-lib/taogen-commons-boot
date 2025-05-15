@@ -4,9 +4,9 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.taogen.commons.boot.mybatisplus.IdName;
-import com.taogen.commons.boot.mybatisplus.annotation.MiddleTable;
-import com.taogen.commons.boot.mybatisplus.annotation.Related;
+import com.taogen.commons.boot.mybatisplus.relatedquery.IdName;
+import com.taogen.commons.boot.mybatisplus.relatedquery.annotation.MiddleTable;
+import com.taogen.commons.boot.mybatisplus.relatedquery.annotation.Related;
 import com.taogen.commons.boot.mybatisplus.samples.service.*;
 import lombok.Data;
 

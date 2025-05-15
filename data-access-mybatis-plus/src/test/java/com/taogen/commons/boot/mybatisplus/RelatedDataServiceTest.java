@@ -1,5 +1,6 @@
 package com.taogen.commons.boot.mybatisplus;
 
+import com.taogen.commons.boot.mybatisplus.relatedquery.RelatedDataService;
 import com.taogen.commons.boot.mybatisplus.samples.entity.User;
 import com.taogen.commons.boot.mybatisplus.samples.entity.UserRole;
 import com.taogen.commons.boot.mybatisplus.samples.service.UserService;

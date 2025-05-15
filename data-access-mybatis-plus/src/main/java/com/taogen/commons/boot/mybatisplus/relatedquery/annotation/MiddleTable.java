@@ -1,4 +1,4 @@
-package com.taogen.commons.boot.mybatisplus.annotation;
+package com.taogen.commons.boot.mybatisplus.relatedquery.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -1,4 +1,4 @@
-package com.taogen.commons.boot.mybatisplus.annotation;
+package com.taogen.commons.boot.mybatisplus.relatedquery.annotation;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 

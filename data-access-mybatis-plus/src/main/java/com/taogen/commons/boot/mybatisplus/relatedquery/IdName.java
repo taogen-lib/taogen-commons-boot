@@ -1,4 +1,4 @@
-package com.taogen.commons.boot.mybatisplus;
+package com.taogen.commons.boot.mybatisplus.relatedquery;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package com.taogen.commons.boot.mybatisplus;
+package com.taogen.commons.boot.mybatisplus.relatedquery;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.LambdaUtils;
@@ -6,8 +6,8 @@ import com.baomidou.mybatisplus.core.toolkit.support.LambdaMeta;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.taogen.commons.boot.SpringUtils;
-import com.taogen.commons.boot.mybatisplus.annotation.MiddleTable;
-import com.taogen.commons.boot.mybatisplus.annotation.Related;
+import com.taogen.commons.boot.mybatisplus.relatedquery.annotation.MiddleTable;
+import com.taogen.commons.boot.mybatisplus.relatedquery.annotation.Related;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.reflection.property.PropertyNamer;
 import org.springframework.util.CollectionUtils;
