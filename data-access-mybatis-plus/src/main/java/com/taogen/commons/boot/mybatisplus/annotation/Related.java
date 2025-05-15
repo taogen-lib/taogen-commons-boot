@@ -1,5 +1,7 @@
 package com.taogen.commons.boot.mybatisplus.annotation;
 
+import com.baomidou.mybatisplus.extension.service.IService;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -16,7 +18,7 @@ public @interface Related {
      *
      * @return
      */
-    Class<?> serviceClass();
+    Class<? extends IService> serviceClass();
 
     /**
      * support {entityClass} or IdName.class
