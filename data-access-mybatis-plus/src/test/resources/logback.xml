@@ -75,8 +75,8 @@
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="ROLLING_FILE_CUSTOM"/>
     </logger>
-    <!-- springProfile name="test | dev" or name="!prod" -->
-    <springProfile name="test-mysql | test-mysql2">
+    <!-- springProfile: 1) name="dev | test". 2) name="!prod" -->
+    <springProfile name="!prod">
         <!-- Define loggers. Set log level for specific packages. -->
         <logger name="com.taogen.commons" level="DEBUG" additivity="false">
             <appender-ref ref="CONSOLE"/>
